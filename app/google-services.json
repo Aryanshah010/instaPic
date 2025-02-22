@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "1091236870777",
+    "firebase_url": "https://dhdhdyd-123cd-default-rtdb.firebaseio.com",
+    "project_id": "dhdhdyd-123cd",
+    "storage_bucket": "dhdhdyd-123cd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091236870777:android:bbdde610495e2409fd72a8",
+        "android_client_info": {
+          "package_name": "com.example.a35b_crud"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1091236870777-q0bvedrse2q4vb8vt8p8q37g3tr391kh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQjys0nAEyH9_q_gTvyHSaMitKCo-H_Q0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1091236870777-q0bvedrse2q4vb8vt8p8q37g3tr391kh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091236870777:android:8e022c4349244dbbfd72a8",
+        "android_client_info": {
+          "package_name": "com.example.instapic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1091236870777-q0bvedrse2q4vb8vt8p8q37g3tr391kh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQjys0nAEyH9_q_gTvyHSaMitKCo-H_Q0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1091236870777-q0bvedrse2q4vb8vt8p8q37g3tr391kh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

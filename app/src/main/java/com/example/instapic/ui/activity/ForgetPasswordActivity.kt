@@ -28,9 +28,9 @@ class ForgetPasswordActivity : AppCompatActivity() {
 
         //initializing loading
         loadingUtils = LoadingUtils(this)
-        forgetPasswordBinding.btnResetPassword.setOnClickListener {
+        forgetPasswordBinding.btnForget.setOnClickListener {
             loadingUtils.show()
-            var email: String = forgetPasswordBinding.etEmail.text.toString()
+            var email: String = forgetPasswordBinding.editEmailForget.text.toString()
 
             userViewModel.forgetPassword(email) { success, message ->
                 if (success) {

@@ -2,20 +2,20 @@ package com.example.instapic.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.instapic.R
 import com.example.instapic.databinding.ActivityLoginBinding
 import com.example.instapic.repository.UserRepositoryImpl
+import com.example.instapic.utils.LoadingUtils
 import com.example.instapic.viewmodel.UserViewModel
 
 class LoginActivity : AppCompatActivity() {
     lateinit var binding: ActivityLoginBinding
     lateinit var userViewModel: UserViewModel
+    lateinit var loadingUtils: LoadingUtils
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,22 +23,28 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        var repo = UserRepositoryImpl()
+        val repo = UserRepositoryImpl()
         userViewModel = UserViewModel(repo)
+
+        // Initializing loading
+        loadingUtils = LoadingUtils(this)
 
         // Login button click
         binding.btnLogin.setOnClickListener {
-            val email: String = binding.loginEmail.text.toString()
-            val password: String = binding.loginPassword.text.toString()
+            loadingUtils.show()
+            val email = binding.loginEmail.text.toString()
+            val password = binding.loginPassword.text.toString()
 
             userViewModel.login(email, password) { success, message ->
                 if (success) {
                     Toast.makeText(this@LoginActivity, message, Toast.LENGTH_LONG).show()
+                    loadingUtils.dismiss()
                     val intent = Intent(this@LoginActivity, NavigationActivity::class.java)
                     startActivity(intent)
                     finish()
                 } else {
                     Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+                    loadingUtils.dismiss()
                 }
             }
         }
@@ -56,22 +62,10 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // Apply edge-to-edge insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-    }
-
-    // Forgot password action
-    fun onForgotPasswordClicked(view: View) {
-        val intent = Intent(this, ForgetPasswordActivity::class.java)
-        startActivity(intent)
-    }
-
-    // Sign up action
-    fun onSignUpClicked(view: View) {
-        val intent = Intent(this, RegisterActivity::class.java)
-        startActivity(intent)
     }
 }

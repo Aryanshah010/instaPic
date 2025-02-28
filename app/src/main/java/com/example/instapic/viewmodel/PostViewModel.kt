@@ -5,11 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.instapic.model.PostModel
 import com.example.instapic.repository.PostRepository
+import com.google.firebase.auth.FirebaseAuth
 
 class PostViewModel(private val postRepository: PostRepository) : ViewModel() {
 
-    private val _posts = MutableLiveData<List<PostModel>>()
-    val posts: LiveData<List<PostModel>> get() = _posts
+    private val _posts = MutableLiveData<List<PostModel>?>()
+    val posts: MutableLiveData<List<PostModel>?> get() = _posts
 
     private val _uploadStatus = MutableLiveData<Pair<Boolean, String>>()
     val uploadStatus: LiveData<Pair<Boolean, String>> get() = _uploadStatus
@@ -29,7 +30,7 @@ class PostViewModel(private val postRepository: PostRepository) : ViewModel() {
 
     // Fetch All Posts
     fun fetchAllPosts() {
-        postRepository.fetchAllPosts { postList, success, message ->
+        postRepository.fetchAllPosts { postList, success, _ ->
             if (success) {
                 _posts.postValue(postList)
             }
@@ -38,7 +39,7 @@ class PostViewModel(private val postRepository: PostRepository) : ViewModel() {
 
     // Fetch User Posts
     fun fetchUserPosts(userId: String) {
-        postRepository.fetchUserPosts(userId) { postList, success, message ->
+        postRepository.fetchUserPosts(userId) { postList, success, _ ->
             if (success) {
                 _posts.postValue(postList)
             }
@@ -66,5 +67,10 @@ class PostViewModel(private val postRepository: PostRepository) : ViewModel() {
                 _likesCount.postValue(Pair(count, message))
             }
         }
+    }
+
+    fun getCurrentUserId(): String {
+        return FirebaseAuth.getInstance().currentUser?.uid 
+            ?: throw IllegalStateException("User must be logged in")
     }
 }

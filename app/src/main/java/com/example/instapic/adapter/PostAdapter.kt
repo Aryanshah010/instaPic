@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.instapic.R
 import com.example.instapic.databinding.ItemPostBinding
 import com.example.instapic.model.PostModel
 
@@ -24,7 +25,7 @@ class PostAdapter(private val context: Context, private var postList: List<PostM
         holder.binding.apply {
             Glide.with(context).load(post.imageUrl).into(postImage)
             captionText.text = post.caption
-            likeCount.text = "${post.likesCount} Likes"
+            likeCount.text = context.getString(R.string.likes_count, post.likesCount)
         }
     }
 

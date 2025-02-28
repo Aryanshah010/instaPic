@@ -1,5 +1,6 @@
 package com.example.instapic.utils
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,26 +12,25 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 
-class ImageUtils(private val activity: AppCompatActivity) {
-    private var activityResultLauncher: ActivityResultLauncher<Intent>? = null
+class ImageUtils(private val activity: FragmentActivity) {
+    private var imageSelectedCallback: ((Uri) -> Unit)? = null
+    private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     private var permissionLauncher: ActivityResultLauncher<String>? = null
 
-    fun registerActivity(callback: (Uri?) -> Unit) {
-        // Register the launcher before using it
-        activityResultLauncher = activity.registerForActivityResult(
+    fun registerActivity(callback: (Uri) -> Unit) {
+        imageSelectedCallback = callback
+        imagePickerLauncher = activity.registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
-            val imageData = result.data
-            if (result.resultCode == AppCompatActivity.RESULT_OK && imageData != null) {
-                val imageUri = imageData.data
-                callback(imageUri) // Return the selected image URI
-            } else {
-                Log.e("ImageUtils", "Image selection failed or cancelled")
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    imageSelectedCallback?.invoke(uri)
+                }
             }
         }
 
-        // Register permission launcher for storage access
         permissionLauncher = activity.registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
@@ -57,8 +57,12 @@ class ImageUtils(private val activity: AppCompatActivity) {
     }
 
     private fun openGallery() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        intent.type = "image/*"
-        activityResultLauncher?.launch(intent)
+        try {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            intent.type = "image/*"
+            imagePickerLauncher.launch(intent)
+        } catch (e: Exception) {
+            Log.e("ImageUtils", "Error opening gallery: ${e.message}")
+        }
     }
 }

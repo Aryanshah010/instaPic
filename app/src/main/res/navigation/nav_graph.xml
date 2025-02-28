@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_feed">
+
+    <fragment
+        android:id="@+id/navigation_feed"
+        android:name="com.example.instapic.ui.fragment.FeedFragment"
+        android:label="Feed" />
+
+    <fragment
+        android:id="@+id/navigation_add_post"
+        android:name="com.example.instapic.ui.fragment.AddPostFragment"
+        android:label="Add Post" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.instapic.ui.fragment.ProfileFragment"
+        android:label="Profile" />
+</navigation> 

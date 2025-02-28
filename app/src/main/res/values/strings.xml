@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">InstaPic</string>
+    <string name="likes_count">%d likes</string>
+    <string name="user_full_name">%1$s %2$s</string>
 </resources>

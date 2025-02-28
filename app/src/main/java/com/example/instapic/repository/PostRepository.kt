@@ -1,5 +1,7 @@
 package com.example.instapic.repository
 
+import android.content.Context
+import android.net.Uri
 import com.example.instapic.model.PostModel
 
 interface PostRepository {
@@ -21,4 +23,6 @@ interface PostRepository {
 
     // Fetch likes count for a post
     fun getLikesCount(postId: String, callback: (Int, Boolean, String) -> Unit)
+
+
 }

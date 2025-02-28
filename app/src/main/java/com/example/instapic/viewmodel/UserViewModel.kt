@@ -33,9 +33,8 @@ class UserViewModel(val repo: UserRepository) {
 
 
     fun getUserFromDatabase(userId:String){
-        repo.getUserFromDatabase(userId){
-                userModel,sucess,message->
-            if(sucess){
+        repo.getUserFromDatabase(userId){ userModel, success, _ ->
+            if(success){
                 _userData.value = userModel
             }else{
                 _userData.value = null

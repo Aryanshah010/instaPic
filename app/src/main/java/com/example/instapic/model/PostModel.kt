@@ -10,7 +10,8 @@ data class PostModel(
     var imageUrl: String = "",
     var caption: String = "",
     var timestamp: Long = 0L,
-    var likesCount: Int = 0
+    var likesCount: Int = 0,
+    var likes: MutableMap<String, Boolean> = mutableMapOf()
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
@@ -18,7 +19,15 @@ data class PostModel(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readLong(),
-        parcel.readInt()
+        parcel.readInt(),
+        mutableMapOf<String, Boolean>().apply {
+            val size = parcel.readInt()
+            repeat(size) {
+                val key = parcel.readString() ?: ""
+                val value = parcel.readInt() == 1
+                put(key, value)
+            }
+        }
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -28,6 +37,11 @@ data class PostModel(
         parcel.writeString(caption)
         parcel.writeLong(timestamp)
         parcel.writeInt(likesCount)
+        parcel.writeInt(likes.size)
+        likes.forEach { (key, value) ->
+            parcel.writeString(key)
+            parcel.writeInt(if (value) 1 else 0)
+        }
     }
 
     override fun describeContents(): Int {

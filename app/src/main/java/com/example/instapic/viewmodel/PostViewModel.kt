@@ -73,4 +73,13 @@ class PostViewModel(private val postRepository: PostRepository) : ViewModel() {
         return FirebaseAuth.getInstance().currentUser?.uid 
             ?: throw IllegalStateException("User must be logged in")
     }
+
+    fun deletePost(postId: String, callback: (Boolean, String) -> Unit) {
+        postRepository.deletePost(postId, callback)
+    }
+
+    fun editPost(postId: String, caption: String, callback: (Boolean, String) -> Unit) {
+        val updates = mapOf("caption" to caption)
+        postRepository.editPost(postId, updates, callback)
+    }
 }

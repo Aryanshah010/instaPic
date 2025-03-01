@@ -2,6 +2,8 @@ package com.example.instapic.repository
 
 import com.example.instapic.model.PostModel
 import com.google.firebase.database.*
+import com.google.firebase.database.Transaction
+import com.google.firebase.database.MutableData
 
 class PostRepositoryImpl : PostRepository {
 
@@ -58,20 +60,52 @@ class PostRepositoryImpl : PostRepository {
 
     // Like a post
     override fun likePost(postId: String, userId: String, callback: (Boolean, String) -> Unit) {
-        val postRef = postsRef.child(postId).child("likes").child(userId)
+        val postRef = postsRef.child(postId)
+        
+        postRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val post = mutableData.getValue(PostModel::class.java) ?: return Transaction.success(mutableData)
+                
+                post.likes[userId] = true
+                post.likesCount = post.likes.size
+                
+                mutableData.value = post
+                return Transaction.success(mutableData)
+            }
 
-        postRef.setValue(true)
-            .addOnSuccessListener { callback(true, "Post liked") }
-            .addOnFailureListener { callback(false, it.message ?: "Error liking post") }
+            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
+                if (error != null) {
+                    callback(false, error.message)
+                } else {
+                    callback(true, "Post liked")
+                }
+            }
+        })
     }
 
     // Unlike a post
     override fun unlikePost(postId: String, userId: String, callback: (Boolean, String) -> Unit) {
-        val postRef = postsRef.child(postId).child("likes").child(userId)
+        val postRef = postsRef.child(postId)
+        
+        postRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val post = mutableData.getValue(PostModel::class.java) ?: return Transaction.success(mutableData)
+                
+                post.likes.remove(userId)
+                post.likesCount = post.likes.size
+                
+                mutableData.value = post
+                return Transaction.success(mutableData)
+            }
 
-        postRef.removeValue()
-            .addOnSuccessListener { callback(true, "Post unliked") }
-            .addOnFailureListener { callback(false, it.message ?: "Error unliking post") }
+            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
+                if (error != null) {
+                    callback(false, error.message)
+                } else {
+                    callback(true, "Post unliked")
+                }
+            }
+        })
     }
 
     // Get likes count
@@ -87,5 +121,19 @@ class PostRepositoryImpl : PostRepository {
                 callback(0, false, error.message)
             }
         })
+    }
+
+    // Delete a post
+    override fun deletePost(postId: String, callback: (Boolean, String) -> Unit) {
+        postsRef.child(postId).removeValue()
+            .addOnSuccessListener { callback(true, "Post deleted successfully") }
+            .addOnFailureListener { callback(false, it.message ?: "Error deleting post") }
+    }
+
+    // Edit post
+    override fun editPost(postId: String, updates: Map<String, Any>, callback: (Boolean, String) -> Unit) {
+        postsRef.child(postId).updateChildren(updates)
+            .addOnSuccessListener { callback(true, "Post updated successfully") }
+            .addOnFailureListener { callback(false, it.message ?: "Error updating post") }
     }
 }

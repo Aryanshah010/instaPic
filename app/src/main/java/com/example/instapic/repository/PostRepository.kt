@@ -24,5 +24,10 @@ interface PostRepository {
     // Fetch likes count for a post
     fun getLikesCount(postId: String, callback: (Int, Boolean, String) -> Unit)
 
+    // Delete a post
+    fun deletePost(postId: String, callback: (Boolean, String) -> Unit)
+
+    // Edit post
+    fun editPost(postId: String, updates: Map<String, Any>, callback: (Boolean, String) -> Unit)
 
 }

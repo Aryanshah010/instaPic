@@ -1,8 +1,8 @@
 package com.example.instapic.ui.fragment
 
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,17 +24,26 @@ class AddPostFragment : Fragment() {
     private val binding get() = _binding!!
     private var selectedImageUri: Uri? = null
     private lateinit var loadingUtils: LoadingUtils
+    private val tag = "AddPostFragment"
 
     private val postViewModel: PostViewModel by viewModels {
         PostViewModelFactory(PostRepositoryImpl())
     }
 
-    // ✅ Register Photo Picker
+    // Image picker
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        Log.d(tag, "Image picker result: $uri")
         if (uri != null) {
-            selectedImageUri = uri
-            binding.imagePreview.setImageURI(uri)
+            try {
+                selectedImageUri = uri
+                binding.imagePreview.setImageURI(uri)
+                Log.d(tag, "Image set successfully")
+            } catch (e: Exception) {
+                Log.e(tag, "Error setting image: ${e.message}")
+                Toast.makeText(requireContext(), "Error loading image", Toast.LENGTH_SHORT).show()
+            }
         } else {
+            Log.d(tag, "No image selected")
             Toast.makeText(requireContext(), "No image selected", Toast.LENGTH_SHORT).show()
         }
     }
@@ -50,44 +59,58 @@ class AddPostFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         loadingUtils = LoadingUtils(requireActivity())
 
+        // Select image button
         binding.selectImageButton.setOnClickListener {
-            openImagePicker()
+            Log.d(tag, "Select image button clicked")
+            try {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            } catch (e: Exception) {
+                Log.e(tag, "Error launching image picker: ${e.message}")
+                Toast.makeText(requireContext(), "Error opening image picker", Toast.LENGTH_SHORT).show()
+            }
         }
 
+        // Upload button
         binding.uploadButton.setOnClickListener {
             uploadPost()
         }
-    }
 
-    private fun openImagePicker() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) // ✅ Works fine
-
-        } else {
-            // Use legacy file picker if needed
-            Toast.makeText(requireContext(), "This device does not support the modern picker", Toast.LENGTH_SHORT).show()
+        // Observe upload status
+        postViewModel.uploadStatus.observe(viewLifecycleOwner) { (success, message) ->
+            Log.d(tag, "Upload status: success=$success, message=$message")
+            loadingUtils.dismiss()
+            binding.uploadButton.isEnabled = true
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            if (success) {
+                clearForm()
+            }
         }
     }
 
     private fun uploadPost() {
+        Log.d(tag, "Starting upload process")
+        
         if (selectedImageUri == null) {
             Toast.makeText(context, "Please select an image first", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val caption = binding.captionInput.text.toString()
+        if (caption.isEmpty()) {
+            Toast.makeText(context, "Please write a caption", Toast.LENGTH_SHORT).show()
             return
         }
 
         binding.uploadButton.isEnabled = false
         loadingUtils.show()
 
-        val caption = binding.captionInput.text.toString()
         selectedImageUri?.let { uri ->
+            Log.d(tag, "Uploading image to Cloudinary: $uri")
             CloudinaryHelper.uploadImage(uri) { imageUrl, error ->
+                Log.d(tag, "Cloudinary response - URL: $imageUrl, Error: $error")
                 activity?.runOnUiThread {
-                    loadingUtils.dismiss()
-                    binding.uploadButton.isEnabled = true
-
                     if (imageUrl != null) {
                         val post = PostModel(
                             userId = postViewModel.getCurrentUserId(),
@@ -96,9 +119,9 @@ class AddPostFragment : Fragment() {
                             timestamp = System.currentTimeMillis()
                         )
                         postViewModel.uploadPost(post)
-                        Toast.makeText(context, "Post uploaded successfully", Toast.LENGTH_SHORT).show()
-                        clearForm()
                     } else {
+                        loadingUtils.dismiss()
+                        binding.uploadButton.isEnabled = true
                         Toast.makeText(context, "Failed to upload image: $error", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -111,7 +134,6 @@ class AddPostFragment : Fragment() {
         binding.imagePreview.setImageDrawable(null)
         selectedImageUri = null
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

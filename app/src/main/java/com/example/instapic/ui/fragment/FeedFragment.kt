@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -17,7 +18,6 @@ import com.example.instapic.viewmodel.PostViewModel
 import com.example.instapic.viewmodel.PostViewModelFactory
 import com.example.instapic.model.PostModel
 import com.example.instapic.utils.SwipeToDeleteCallback
-import android.widget.EditText
 
 class FeedFragment : Fragment() {
 
@@ -78,12 +78,10 @@ class FeedFragment : Fragment() {
                 postAdapter.updatePosts(postList)
             }
         }
+    }
 
-        postViewModel.likeStatus.observe(viewLifecycleOwner) { (success, message) ->
-            if (!success) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            }
-        }
+    private fun loadPosts() {
+        postViewModel.fetchAllPosts()
     }
 
     private fun handleLikeClick(post: PostModel) {
@@ -94,23 +92,9 @@ class FeedFragment : Fragment() {
             } else {
                 postViewModel.likePost(post.postId, userId)
             }
-            // Refresh posts to update like count
-            postViewModel.fetchAllPosts()
-        } catch (e: IllegalStateException) {
-            Toast.makeText(context, "Please login to like posts", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun loadPosts() {
-        postViewModel.fetchAllPosts()
-        postViewModel.posts.observe(viewLifecycleOwner) { posts ->
-            posts?.let { postList ->
-                if (postList.isNotEmpty()) {
-                    postAdapter.updatePosts(postList)
-                } else {
-                    Toast.makeText(requireContext(), "No posts available", Toast.LENGTH_SHORT).show()
-                }
-            }
+            postViewModel.fetchAllPosts() // Refresh posts to update like count
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
